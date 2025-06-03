@@ -10,23 +10,18 @@ import SwiftData
 
 @main
 struct MacBoxApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @StateObject private var vmManager = VMManager()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+                .environmentObject(vmManager)
         }
-        .modelContainer(sharedModelContainer)
+        .windowStyle(DefaultWindowStyle())
     }
 }
+
+
+
+
+
