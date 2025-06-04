@@ -6,6 +6,7 @@
 //
 
 import Testing
+import Foundation
 
 @testable import MacBox
 
@@ -18,12 +19,18 @@ struct MacBoxTests {
     @Test
         func testAddAndRemoveVM() async throws {
             let manager = VMManager()
-            let vm = VMConfig(name: "Test VM", cpuCount: 2, memorySizeMB: 2048, diskSizeGB: 40, osType: "macOS")
+            let vm = MacBox.VMConfig(
+                id: UUID(),
+                name: "Test VM",
+                cpuCount: 2,
+                memorySizeMB: 4096,
+                diskSizeGB: 64,
+                osType: "macOS" // Replace '.macOS' with the appropriate enum case if needed
+            )
 
             manager.addVM(vm)
             #expect(manager.vmList.count == 1)
-            #expect(manager.vmList.contains(vm))
-
+            #expect(manager.vmList.contains(where: { $0.id == vm.id && $0.name == vm.name }))
             manager.removeVM(vm)
             #expect(manager.vmList.isEmpty)
         }

@@ -11,7 +11,7 @@ import SwiftData
 @main
 struct MacBoxApp: App {
     @StateObject private var vmManager = VMManager()
-
+    
     var body: some Scene {
         WindowGroup {
             MainView()

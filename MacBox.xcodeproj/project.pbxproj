@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E5A711FA2DEFE434002C5397 /* SwiftData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5A711F92DEFE434002C5397 /* SwiftData.framework */; };
+		E5A711FB2DEFE44F002C5397 /* SwiftData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5A711F92DEFE434002C5397 /* SwiftData.framework */; };
+		E5A711FC2DEFE458002C5397 /* SwiftData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E5A711F92DEFE434002C5397 /* SwiftData.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E59AE30B2DED9DA4008B0E0F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +33,7 @@
 		E59AE2FA2DED9DA3008B0E0F /* MacBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59AE30A2DED9DA4008B0E0F /* MacBoxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacBoxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59AE3142DED9DA4008B0E0F /* MacBoxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacBoxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E5A711F92DEFE434002C5397 /* SwiftData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftData.framework; path = System/Library/Frameworks/SwiftData.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5A711FC2DEFE458002C5397 /* SwiftData.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5A711FA2DEFE434002C5397 /* SwiftData.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,6 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5A711FB2DEFE44F002C5397 /* SwiftData.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +88,7 @@
 				E59AE2FC2DED9DA3008B0E0F /* MacBox */,
 				E59AE30D2DED9DA4008B0E0F /* MacBoxTests */,
 				E59AE3172DED9DA4008B0E0F /* MacBoxUITests */,
+				E5A711F82DEFE434002C5397 /* Frameworks */,
 				E59AE2FB2DED9DA3008B0E0F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +101,14 @@
 				E59AE3142DED9DA4008B0E0F /* MacBoxUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		E5A711F82DEFE434002C5397 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E5A711F92DEFE434002C5397 /* SwiftData.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -413,7 +432,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -441,7 +460,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
@@ -458,7 +477,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomnowell.MacBoxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MacBox.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MacBox";
 			};
 			name = Debug;
@@ -476,7 +495,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomnowell.MacBoxTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MacBox.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MacBox";
 			};
 			name = Release;
@@ -492,7 +511,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomnowell.MacBoxUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_TARGET_NAME = MacBox;
 			};
 			name = Debug;
@@ -508,7 +527,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomnowell.MacBoxUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_TARGET_NAME = MacBox;
 			};
 			name = Release;

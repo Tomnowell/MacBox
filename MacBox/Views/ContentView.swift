@@ -25,13 +25,14 @@ struct ContentView: View {
                 .onDelete(perform: deleteItems)
             }
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            .toolbar {
+            /*.toolbar {
                 ToolbarItem {
                     Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                        Image(systemName: "plus")
+                            .help("Add Item")
                     }
                 }
-            }
+            }*/
         } detail: {
             Text("Select an item")
         }
