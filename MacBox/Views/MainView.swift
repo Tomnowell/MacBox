@@ -23,7 +23,7 @@ struct MainView: View {
             .frame(minWidth: 200)
             .toolbar {
                 ToolbarItemGroup(placement: .automatic) {
-                    Button("Add") {
+                    Button("+") {
                         showingCreateSheet = true
                     }
                 }
