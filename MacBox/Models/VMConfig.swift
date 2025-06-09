@@ -1,27 +1,31 @@
 import Foundation
+import Virtualization
 
 final class VMConfig: Identifiable, ObservableObject, Codable, Equatable, Hashable {
     var id: UUID
     var name: String
     var cpuCount: Int
-    var memorySizeMB: Int
+    var memorySizeMB: UInt64
     var diskSizeGB: Int
     var osType: String // "macOS" or "Linux"
     
-    var diskImagePaths: [String] // Absolute paths to attached disk images
+    var bootDiskImagePath: String? // Absolute paths to attached disk images
     var installMediaPath: String? // Optional boot/install ISO image
-    var networkType: String // e.g., "NAT", "Bridged", "HostOnly"
+    var networkType: String? // e.g., "NAT", "Bridged", "HostOnly"
+    
+    var storageDevices: [String]
 
     init(
         id: UUID = UUID(),
         name: String = "MacBox VM",
-        cpuCount: Int = 2,
-        memorySizeMB: Int = 4096,
-        diskSizeGB: Int = 20,
+        cpuCount: Int = 1,
+        memorySizeMB: UInt64 = 4096,
+        diskSizeGB: Int = 10,
         osType: String = "Linux",
-        diskImagePaths: [String] = [],
+        bootDiskImagePath: String? = nil,
         installMediaPath: String? = nil,
-        networkType: String = "None"
+        networkType: String? = nil,
+        storageDevices: [String] = []
     ) {
         self.id = id
         self.name = name
@@ -29,15 +33,15 @@ final class VMConfig: Identifiable, ObservableObject, Codable, Equatable, Hashab
         self.memorySizeMB = memorySizeMB
         self.diskSizeGB = diskSizeGB
         self.osType = osType
-        self.diskImagePaths = diskImagePaths
+        self.bootDiskImagePath = bootDiskImagePath
         self.installMediaPath = installMediaPath
         self.networkType = networkType
+        self.storageDevices = storageDevices
     }
 
     // MARK: - Codable conformance
     enum CodingKeys: String, CodingKey {
-        case id, name, cpuCount, memorySizeMB, diskSizeGB, osType
-        case diskImagePaths, installMediaPath, networkType
+        case id, name, cpuCount, memorySizeMB, diskSizeGB, osType, bootDiskImagePath, installMediaPath, networkType, storageDevices
     }
     
     // MARK: - Hashable

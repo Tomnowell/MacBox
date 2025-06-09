@@ -14,7 +14,7 @@ struct CreateVMView: View {
     @Environment(\.dismiss) var dismiss
     @State private var name = "New VM"
     @State private var cpu = 2
-    @State private var memory = 2048
+    @State private var memory: UInt64 = 2048
     @State private var disk = 50
     @State private var osType = "macOS"
     
@@ -44,7 +44,7 @@ struct CreateVMView: View {
             Stepper(
                 "Memory: \(memory) MB",
                 value: $memory,
-                in: 512...(Int(ProcessInfo.processInfo.physicalMemory / 1024 / 1024)),
+                in: 512...(ProcessInfo.processInfo.physicalMemory / 1024 / 1024),
                 step: 512
             )
             Stepper("Disk: \(disk) GB", value: $disk, in: 0...(maxDiskSizeGB ?? 0), step: 10)

@@ -17,7 +17,7 @@ class VMManager: ObservableObject {
     }
     
     // Overload method for calling from UI
-    func addVM(name: String, osType: String, cpu: Int, memory: Int, disk: Int) {
+    func addVM(name: String, osType: String, cpu: Int, memory: UInt64, disk: Int) {
         let config = VMConfig(name: name, cpuCount: cpu, memorySizeMB: memory, diskSizeGB: disk, osType: osType)
         addVM(config) // calls the first one
     }
