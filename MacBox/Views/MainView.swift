@@ -17,7 +17,8 @@ struct MainView: View {
         NavigationSplitView {
             List(selection: $selectedVM) {
                 ForEach(vmManager.vmList) { vm in
-                    Text(vm.name)
+                VMRowView(vm: vm)
+                    .tag(vm)
                 }
             }
             .frame(minWidth: 200)
@@ -30,15 +31,7 @@ struct MainView: View {
             }
         } detail: {
             if let vm = selectedVM {
-                VStack {
-                    Text("\(vm.name)")
-                        .font(.largeTitle)
-                    Text("OS: \(vm.osType)")
-                    Text("CPU: \(vm.cpuCount) cores")
-                    Text("Memory: \(vm.memorySizeMB) MB")
-                    Text("Disk: \(vm.diskSizeGB) GB")
-                }
-                .padding()
+                VMDetailView(vmConfig: vm)
             } else {
                 Text("Select a VM")
             }
