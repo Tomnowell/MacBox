@@ -1,13 +1,14 @@
 import Foundation
 import Virtualization
 
-final class VMConfig: Identifiable, ObservableObject, Codable, Equatable, Hashable {
+struct VMConfig: Identifiable, Codable, Equatable, Hashable, Sendable {
     var id: UUID
     var name: String
     var cpuCount: Int
     var memorySizeMB: UInt64
     var diskSizeGB: Int
-    var osType: String // "macOS" or "Linux"
+    var osType: String // "macOS14"
+    var efiVariableStorePath: String? // Required for ALL modern OS that require EFI boot.
     
     var bootDiskImagePath: String? // Absolute paths to attached disk images
     var installMediaPath: String? // Optional boot/install ISO image
@@ -21,7 +22,8 @@ final class VMConfig: Identifiable, ObservableObject, Codable, Equatable, Hashab
         cpuCount: Int = 1,
         memorySizeMB: UInt64 = 4096,
         diskSizeGB: Int = 10,
-        osType: String = "Linux",
+        osType: String = "MacOs15",
+        efiVariableStorePath: String? = nil,
         bootDiskImagePath: String? = nil,
         installMediaPath: String? = nil,
         networkType: String? = nil,
@@ -33,6 +35,7 @@ final class VMConfig: Identifiable, ObservableObject, Codable, Equatable, Hashab
         self.memorySizeMB = memorySizeMB
         self.diskSizeGB = diskSizeGB
         self.osType = osType
+        self.efiVariableStorePath = efiVariableStorePath
         self.bootDiskImagePath = bootDiskImagePath
         self.installMediaPath = installMediaPath
         self.networkType = networkType

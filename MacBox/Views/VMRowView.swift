@@ -8,31 +8,42 @@
 import SwiftUI
 
 struct VMRowView: View {
-    let vm: VMConfig
+    let vmConfig: VMConfig
     var isRunning: Bool {
-        VMRuntimeManager.shared.isRunning(id: vm.id)
+        VMRuntimeManager.shared.isRunning(id: vmConfig.id)
     }
 
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(vm.name)
+                Text(vmConfig.name)
                     .font(.headline)
-                Text(vm.osType)
+                Text(vmConfig.osType)
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
             Spacer()
+            /*
             if isRunning {
-                Image(systemName: "play.circle.fill")
-                    .foregroundColor(.green)
-                    .help("Running")
+                Button(action: {
+                    VMRuntimeManager.shared.stopVM(id: vmConfig.id)
+                }) {
+                    Image(systemName: "play.circle.fill")
+                        .foregroundColor(.green)
+                        .help("Running (Click to pause)")
+                }
+                .buttonStyle(.plain)
             } else {
-                Image(systemName: "pause.circle")
-                    .foregroundColor(.gray)
-                    .help("Stopped")
-            }
+                Button(action: {
+                    VMRuntimeManager.shared.launchVM(from: vmConfig)
+                }) {
+                    Image(systemName: "stop.circle")
+                        .foregroundColor(.gray)
+                        .help("Stopped (Click to start)")
+                }
+                .buttonStyle(.plain)
+            }*/
         }
-        .padding(.vertical, 4)
+    .padding(.vertical, 4)
     }
 }

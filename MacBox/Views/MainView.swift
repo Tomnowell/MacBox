@@ -16,9 +16,9 @@ struct MainView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $selectedVM) {
-                ForEach(vmManager.vmList) { vm in
-                VMRowView(vm: vm)
-                    .tag(vm)
+                ForEach(vmManager.vmList) { vmConfig in
+                    VMRowView(vmConfig: vmConfig)
+                    .tag(vmConfig)
                 }
             }
             .frame(minWidth: 200)
@@ -30,8 +30,8 @@ struct MainView: View {
                 }
             }
         } detail: {
-            if let vm = selectedVM {
-                VMDetailView(vmConfig: vm)
+            if let vmConfig = selectedVM {
+                VMDetailView(vmConfig: vmConfig)
             } else {
                 Text("Select a VM")
             }
