@@ -5,10 +5,30 @@
 //  Created by Tom on 2025/06/09.
 //
 
-
 import Virtualization
+import Foundation
 
 struct VZConfigurationBuilder {
+    // Helper function to download a file with retry logic and exponential backoff.
+    static func downloadWithRetry(from url: URL, maxAttempts: Int = 3) async throws -> URL {
+        var lastError: Error?
+        for attempt in 1...maxAttempts {
+            do {
+                let (downloadedLocation, _) = try await URLSession.shared.download(from: url)
+                return downloadedLocation
+            } catch {
+                lastError = error
+                print("Attempt \(attempt) to download \(url) failed: \(error)")
+                if attempt < maxAttempts {
+                    let delay = UInt64(pow(2.0, Double(attempt - 1))) * 1_000_000_000 // 1s, 2s, 4s
+                    print("Retrying in \(delay / 1_000_000_000) seconds...")
+                    try await Task.sleep(nanoseconds: delay)
+                }
+            }
+        }
+        throw lastError ?? URLError(.unknown)
+    }
+    
     static func build(from config: VMConfig) async throws -> VZVirtualMachineConfiguration {
         let vmConfig = VZVirtualMachineConfiguration()
         // Load the latest image.
@@ -21,26 +41,31 @@ struct VZConfigurationBuilder {
         // restoreImage came from latestSupported, its URL property refers
         // to an image on the network.
         // Download the image to the local filesystem.
-        guard let (location, _) = try? await
-                URLSession.shared.download(from: restoreImage.url) else {
-            fatalError("""
-                               Failed to download the macOS image from the network.
-                               """)
-        }
-        
-        
-        // VZMacOSInstaller must be called with a URL corresponding to a local file.
-        let localRestoreImageDirectoryURL = URL(fileURLWithPath:
-            "*set to the directory where the restore image should be stored*")
-        
+        let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        let localRestoreImageDirectoryURL = appSupportDir.appendingPathComponent("MacBoxRestoreImages", isDirectory: true)
         let localRestoreImageURL = localRestoreImageDirectoryURL
             .appendingPathComponent(restoreImage.url.lastPathComponent)
-        
-        
-        guard ((try? FileManager.default.moveItem(at: location, to:
-                                                    localRestoreImageURL)) != nil)
-        else {
-            fatalError("Failed to move the macOS image to its destination.")
+
+        // Ensure the destination directory exists
+        try FileManager.default.createDirectory(at: localRestoreImageDirectoryURL, withIntermediateDirectories: true)
+
+        // If restore image does not exist, download it and move to local cache
+        if !FileManager.default.fileExists(atPath: localRestoreImageURL.path) {
+            print("Restore image not found on disk; downloading...")
+            let downloadedLocation = try await downloadWithRetry(from: restoreImage.url)
+            // Remove any partially downloaded old file
+            if FileManager.default.fileExists(atPath: localRestoreImageURL.path) {
+                try FileManager.default.removeItem(at: localRestoreImageURL)
+            }
+            do {
+                try FileManager.default.moveItem(at: downloadedLocation, to: localRestoreImageURL)
+                print("Restore image moved to cache at \(localRestoreImageURL.path)")
+            } catch {
+                print("Move failed: \(error)")
+                fatalError("Failed to move the macOS image to its destination.")
+            }
+        } else {
+            print("Restore image already exists at \(localRestoreImageURL.path). Skipping download.")
         }
         
         
@@ -50,24 +75,28 @@ struct VZConfigurationBuilder {
         restoreImage.mostFeaturefulSupportedConfiguration!
         
         
-        // Construct a VZVirtualMachineConfiguration that satisfies the
-        // configuration requirements.
-        let configuration = VZVirtualMachineConfiguration()
-        
+        // Use vmConfig for all configuration
         
         // The following are minimum values; you can use larger values.
-        configuration.cpuCount = config.cpuCount
-        configuration.memorySize = config.memorySizeMB
+        vmConfig.cpuCount = config.cpuCount
+        vmConfig.memorySize = config.memorySizeMB * 1024 * 1024 
         
         
-        configuration.bootLoader = VZMacOSBootLoader()
+        vmConfig.bootLoader = VZMacOSBootLoader()
         
         
         // Set up a valid Mac platform configuration for the restore image.
         let hardwareModel = configurationRequirements.hardwareModel
         let macPlatformConfiguration = VZMacPlatformConfiguration()
-        let auxiliaryStorageURL = URL(fileURLWithPath:
-                                        "*set to the path where the auxiliary storage should be stored*")
+        
+        let auxiliaryStorageDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!.appendingPathComponent("MacBoxAuxiliaryStorage", isDirectory: true)
+        try FileManager.default.createDirectory(at: auxiliaryStorageDir, withIntermediateDirectories: true)
+        let auxiliaryStorageURL = auxiliaryStorageDir.appendingPathComponent("AuxiliaryStorage.vzac")
+        
+        if FileManager.default.fileExists(atPath: auxiliaryStorageURL.path) {
+                 try? FileManager.default.removeItem(at: auxiliaryStorageURL)
+             }
+        
         guard let auxiliaryStorage = try? VZMacAuxiliaryStorage(creatingStorageAt:
                                                                     auxiliaryStorageURL,
                                                                 hardwareModel: hardwareModel,
@@ -76,38 +105,21 @@ struct VZConfigurationBuilder {
         }
         macPlatformConfiguration.auxiliaryStorage = auxiliaryStorage
         macPlatformConfiguration.hardwareModel = hardwareModel
-        configuration.platform = macPlatformConfiguration
+        vmConfig.platform = macPlatformConfiguration
         
+        // MARK: Minimum required devices
+        // Graphics device with a single display
+        let graphicsDevice = VZMacGraphicsDeviceConfiguration()
+        let display = VZMacGraphicsDisplayConfiguration(widthInPixels: 1920, heightInPixels: 1200, pixelsPerInch: 220)
+        graphicsDevice.displays = [display]
+        vmConfig.graphicsDevices = [graphicsDevice]
+
+        // Keyboard
+        vmConfig.keyboards = [VZUSBKeyboardConfiguration()]
+
+        // Pointing device
+        vmConfig.pointingDevices = [VZUSBScreenCoordinatePointingDeviceConfiguration()]
         
-        fatalError(
-            """
-            *set up storageDevices, graphicsDevices, pointingDevices,
-            keyboards, etc. here*
-            """)
-        
-        
-        guard ((try? configuration.validate()) != nil) else {
-            fatalError("Virtual machine configuration is invalid.")
-        }
-        
-        
-        let virtualMachine = VZVirtualMachine(configuration: configuration)
-        let installer = VZMacOSInstaller(virtualMachine: virtualMachine,
-                                         restoringFromImageAt: localRestoreImageURL)
-        installer.install(completionHandler: { (result: Result) in
-            if case let .failure(error) = result {
-                fatalError("Installation failure: \(error)")
-            } else {
-                // Installation was successful.
-            }
-        })
-        
-        
-        // Observe progress using installer.progress object.
-        installer.progress.observe(\.fractionCompleted, options: [.initial, .new]) {
-            (progress, change) in
-            print("Installation progress: \(change.newValue! * 100).")
-        }
         
         var storageDevices: [VZStorageDeviceConfiguration] = []
         
@@ -155,5 +167,4 @@ struct VZConfigurationBuilder {
         case missingEFIVariableStore
     }
 }
-
 

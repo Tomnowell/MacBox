@@ -72,14 +72,3 @@ extension Collection {
     var isNotEmpty: Bool { !isEmpty }
 }
 
-// MARK: - DispatchQueue Helpers
-
-extension DispatchQueue {
-    static func mainAsync(_ execute: @escaping () -> Void) {
-        if Thread.isMainThread {
-            execute()
-        } else {
-            main.async { execute() }
-        }
-    }
-}
