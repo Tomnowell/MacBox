@@ -46,6 +46,12 @@ struct VMDetailView: View {
             if !vmConfig.storageDevices.isEmpty {
                 Text("Storage Devices: \(vmConfig.storageDevices.joined(separator: ", "))")
             }
+            
+            if let vm = VMRuntimeManager.shared.virtualMachine(for: vmConfig.id) {
+                VirtualMachineView(virtualMachine: vm)
+                    .frame(minWidth: 320, maxWidth: 640, minHeight: 240, maxHeight: 480)
+            }
+                        
 
             HStack(spacing: 20) {
                 Button(isLaunching ? "Launching..." : "Start VM") {
@@ -73,9 +79,9 @@ struct VMDetailView: View {
                         isLaunching = false
                         switch result {
                         case .success:
-                            launchStatus = "🛑 VM '\(vmConfig.name)' stopped successfully."
+                            launchStatus = "VM '\(vmConfig.name)' stopped successfully."
                         case .failure(let error):
-                            launchStatus = "❌ Failed to stop VM: \(error.localizedDescription)"
+                            launchStatus = "Failed to stop VM: \(error.localizedDescription)"
                         }
                     }
                 }

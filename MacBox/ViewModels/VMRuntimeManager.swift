@@ -26,6 +26,7 @@ final class VMRuntimeManager: ObservableObject {
                 switch result {
                 case .success:
                     print("VM '\(config.name)' started.")
+                    print("VM state after start: \(vm.state.rawValue)")
                     continuation.resume()
                 case .failure(let error):
                     print("Failed to start VM '\(config.name)': \(error)")
@@ -56,6 +57,10 @@ final class VMRuntimeManager: ObservableObject {
 
     func isRunning(id: UUID) -> Bool {
         runningVMs[id] != nil
+    }
+    
+    func virtualMachine(for id: UUID) -> VZVirtualMachine? {
+        runningVMs[id]
     }
 }
 

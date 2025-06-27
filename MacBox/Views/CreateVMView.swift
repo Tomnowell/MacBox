@@ -27,8 +27,7 @@ struct CreateVMView: View {
         maxDiskSizeBytes.map { Int($0 / 1024 / 1024 / 1024) }
     }
     
-
-    let osTypes = ["macOS", "Linux", "Windows", "FreeBSD", "Solaris", "AIX", "OpenBSD", "NetBSD", "Other"]
+    
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -48,9 +47,9 @@ struct CreateVMView: View {
                 step: 512
             )
             Stepper("Disk: \(disk) GB", value: $disk, in: 0...(maxDiskSizeGB ?? 0), step: 10)
-            Picker("OS Type", selection: $osType) {
-                ForEach(osTypes, id: \ .self) { Text($0) }
-            }
+            
+            // Only support macOS for now - perhaps a pro version could support Linux / Windows on Arm etc.
+            let osType = "macOS"
 
             HStack {
                 Spacer()
