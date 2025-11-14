@@ -8,7 +8,7 @@
 import Foundation
 
 public final class SystemUtilities {
-    static func getFreeDiskSpace(in directory: URL = FileManager.default.homeDirectoryForCurrentUser) -> Int64? {
+    public static func getFreeDiskSpace(in directory: URL = FileManager.default.homeDirectoryForCurrentUser) -> Int64? {
         do {
             let values = try directory.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
             return values.volumeAvailableCapacityForImportantUsage

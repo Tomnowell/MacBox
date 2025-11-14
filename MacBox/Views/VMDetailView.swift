@@ -8,15 +8,17 @@
 import SwiftUI
 
 struct VMDetailView: View {
-    let vmConfig: VMConfig
+    let vm: VMConfig
+    let onLaunch: () -> Void
     @ObservedObject private var runtimeManager = VMRuntimeManager.shared
     
     @State private var launchStatus: String?
     @State private var isStopping = false
     @State private var isLaunching = false
+    @State private var showVMWindow = false
 
     var isRunning: Bool {
-        runtimeManager.runningVMs[vmConfig.id] != nil
+        runtimeManager.runningVMs[vm.id] != nil
     }
 
     var body: some View {
@@ -28,28 +30,40 @@ struct VMDetailView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
             }
-            Text(vmConfig.name)
+            Text(vm.name)
                 .font(.largeTitle)
-            Text("OS: \(vmConfig.osType)")
-            Text("CPU: \(vmConfig.cpuCount) cores")
-            Text("Memory: \(vmConfig.memorySizeMB) MB")
-            Text("Disk: \(vmConfig.diskSizeGB) GB")
-            if let bootDisk = vmConfig.bootDiskImagePath {
+            Text("OS: \(vm.osType)")
+            Text("CPU: \(vm.cpuCount) cores")
+            Text("Memory: \(vm.memorySizeMB) MB")
+            Text("Disk: \(vm.diskSizeGB) GB")
+            if let bootDisk = vm.bootDiskImagePath {
                 Text("Boot Disk: \(bootDisk)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
             }
-            if let installMedia = vmConfig.installMediaPath {
-                Text("Install Media: \(installMedia)")
-            }
-            if let network = vmConfig.networkType {
+            if let network = vm.networkType {
                 Text("Network: \(network)")
             }
-            if !vmConfig.storageDevices.isEmpty {
-                Text("Storage Devices: \(vmConfig.storageDevices.joined(separator: ", "))")
+            if !vm.storageDevices.isEmpty {
+                Text("Storage Devices: \(vm.storageDevices.joined(separator: ", "))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
-            if let vm = VMRuntimeManager.shared.virtualMachine(for: vmConfig.id) {
-                VirtualMachineView(virtualMachine: vm)
-                    .frame(minWidth: 320, maxWidth: 640, minHeight: 240, maxHeight: 480)
+            // Show VM window when running
+            if let virtualMachine = VMRuntimeManager.shared.virtualMachine(for: vm.id) {
+                Divider()
+                
+                VStack(spacing: 10) {
+                    Text("Virtual Machine Display")
+                        .font(.headline)
+                    
+                    VirtualMachineDisplayView(virtualMachine: virtualMachine)
+                        .frame(minWidth: 1280, minHeight: 800)
+                        .border(Color.gray.opacity(0.3))
+                }
             }
                         
 
@@ -57,39 +71,37 @@ struct VMDetailView: View {
                 Button(isLaunching ? "Launching..." : "Start VM") {
                     isLaunching = true
                     launchStatus = nil
+                    onLaunch()
                     Task {
-                        do {
-                            try await VMRuntimeManager.shared.launchVM(from: vmConfig)
-                            isLaunching = false
+                        // Wait a moment for launch to complete
+                        try? await Task.sleep(nanoseconds: 1_000_000_000)
+                        isLaunching = false
+                        if runtimeManager.isRunning(id: vm.id) {
                             launchStatus = "VM started successfully!"
-                        } catch {
-                            isLaunching = false
-                            launchStatus = "Failed to start VM: \(error.localizedDescription)"
+                            showVMWindow = true
                         }
                     }
                 }
-                .disabled(isLaunching)
-                .disabled(isRunning)
+                .disabled(isLaunching || isRunning)
 
                 
                 Button(isStopping ? "Stopping..." : "Stop VM") {
-                    isLaunching = false
                     isStopping = true
-                    VMRuntimeManager.shared.stopVM(id: vmConfig.id) { result in
-                        isLaunching = false
+                    showVMWindow = false
+                    VMRuntimeManager.shared.stopVM(id: vm.id) { result in
+                        isStopping = false
                         switch result {
                         case .success:
-                            launchStatus = "VM '\(vmConfig.name)' stopped successfully."
+                            launchStatus = "VM '\(vm.name)' stopped successfully."
                         case .failure(let error):
                             launchStatus = "Failed to stop VM: \(error.localizedDescription)"
                         }
                     }
                 }
-                .disabled(isLaunching || !VMRuntimeManager.shared.isRunning(id: vmConfig.id))
+                .disabled(isStopping || !runtimeManager.isRunning(id: vm.id))
             }
             .padding(.top, 20)
         }
         .padding()
     }
 }
-

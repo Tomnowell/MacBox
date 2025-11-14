@@ -2,59 +2,82 @@
 //  ContentView.swift
 //  MacBox
 //
-//  Created by Tom on 2025/06/02.
+//  Created by Tom on 2025/06/09.
 //
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @StateObject private var vmManager = VMManager()
+    @StateObject private var runtimeManager = VMRuntimeManager.shared
+    @State private var selectedVM: VMConfig?
+    @State private var showCreateVM = false
+    @State private var isLaunching = false
+    @State private var launchError: String?
+    @State private var showLaunchError = false
+    
     var body: some View {
         NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+            // VM List Sidebar
+            List(selection: $selectedVM) {
+                ForEach(vmManager.vmList) { vm in
+                    VMRowView(vm: vm, isRunning: runtimeManager.isRunning(id: vm.id))
+                        .tag(vm)
+                }
+                .onDelete { indexSet in
+                    indexSet.forEach { index in
+                        vmManager.removeVM(vmManager.vmList[index])
+                    }
+                }
+            }
+            .navigationTitle("Virtual Machines")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showCreateVM = true
                     } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                        Label("Add VM", systemImage: "plus")
                     }
                 }
-                .onDelete(perform: deleteItems)
             }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            /*.toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Image(systemName: "plus")
-                            .help("Add Item")
-                    }
-                }
-            }*/
+            .sheet(isPresented: $showCreateVM) {
+                CreateVMView()
+                    .environmentObject(vmManager)
+            }
         } detail: {
-            Text("Select an item")
+            if let vm = selectedVM {
+                VMDetailView(vm: vm) {
+                    launchVM(vm)
+                }
+            } else {
+                Text("Select a virtual machine")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .alert("Launch Error", isPresented: $showLaunchError) {
+            Button("OK") {}
+        } message: {
+            Text(launchError ?? "Failed to launch VM")
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+    
+    private func launchVM(_ vm: VMConfig) {
+        guard !isLaunching else { return }
+        
+        isLaunching = true
+        Task {
+            do {
+                try await runtimeManager.launchVM(from: vm)
+                await MainActor.run {
+                    isLaunching = false
+                }
+            } catch {
+                await MainActor.run {
+                    launchError = error.localizedDescription
+                    showLaunchError = true
+                    isLaunching = false
+                }
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

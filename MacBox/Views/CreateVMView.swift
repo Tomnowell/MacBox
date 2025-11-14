@@ -55,10 +55,17 @@ struct CreateVMView: View {
                 Spacer()
                 Button("Cancel") { dismiss() }
                 Button("Create") {
-                    let config = VMConfig(name: name, cpuCount: cpu, memorySizeMB: memory, diskSizeGB: disk, osType: osType)
+                    let config = VMConfig(
+                        name: name, 
+                        cpuCount: cpu, 
+                        memorySizeMB: memory, 
+                        diskSizeGB: disk, 
+                        osType: osType
+                    )
                     vmManager.addVM(config)
                     dismiss()
                 }
+                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
         .padding()

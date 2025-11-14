@@ -11,7 +11,7 @@ struct VMConfig: Identifiable, Codable, Equatable, Hashable, Sendable {
     var efiVariableStorePath: String? // Required for ALL modern OS that require EFI boot.
     
     var bootDiskImagePath: String? // Absolute paths to attached disk images
-    var installMediaPath: String? // Optional boot/install ISO image
+    var installMediaPath: URL? // Optional boot/install ISO image
     var networkType: String? // e.g., "NAT", "Bridged", "HostOnly"
     
     var storageDevices: [String]
@@ -21,11 +21,10 @@ struct VMConfig: Identifiable, Codable, Equatable, Hashable, Sendable {
         name: String = "MacBox VM",
         cpuCount: Int = 1,
         memorySizeMB: UInt64 = 8196,
-        diskSizeGB: Int = 50,
+        diskSizeGB: Int = 128,
         osType: String = "MacOs15",
         efiVariableStorePath: String? = nil,
         bootDiskImagePath: String? = nil,
-        installMediaPath: String? = nil,
         networkType: String? = nil,
         storageDevices: [String] = []
     ) {
@@ -37,7 +36,6 @@ struct VMConfig: Identifiable, Codable, Equatable, Hashable, Sendable {
         self.osType = osType
         self.efiVariableStorePath = efiVariableStorePath
         self.bootDiskImagePath = bootDiskImagePath
-        self.installMediaPath = installMediaPath
         self.networkType = networkType
         self.storageDevices = storageDevices
     }
