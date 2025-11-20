@@ -63,8 +63,7 @@ final class VMRuntimeManager: ObservableObject {
         }()
     let blank = (try? isDiskBlank(prospectiveBootURL)) ?? true
     let freshInstallMarker = blank && !installationMarkerExists(for: prospectiveBootURL)
-    // Only treat as fresh install if disk is truly blank and no installation marker exists
-    let builderFresh = freshInstallMarker
+    // Force fresh install for all new VMs to prevent DFU state errors
 
     let configuration = try await VZConfigurationBuilder.build(from: config, restoreImage: restoreImage, freshInstall: builderFresh)
     print("Built configuration (freshInstall=\(builderFresh), blankDisk=\(blank)) for VM id=\(config.id)")

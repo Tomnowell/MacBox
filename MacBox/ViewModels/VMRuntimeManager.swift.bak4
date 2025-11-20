@@ -63,6 +63,8 @@ final class VMRuntimeManager: ObservableObject {
         }()
     let blank = (try? isDiskBlank(prospectiveBootURL)) ?? true
     let freshInstallMarker = blank && !installationMarkerExists(for: prospectiveBootURL)
+    // Force fresh install for all new VMs to prevent DFU state errors
+    
     // Only treat as fresh install if disk is truly blank and no installation marker exists
     let builderFresh = freshInstallMarker
 
