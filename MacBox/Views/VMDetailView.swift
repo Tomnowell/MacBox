@@ -127,11 +127,19 @@ struct VMDetailView: View {
         // Close existing window if any
         vmWindow?.close()
         
+        // VM display resolution (matches VZConfigurationBuilder settings: 1920x1200)
+        let displayWidth: CGFloat = 1920
+        let displayHeight: CGFloat = 1200
+        
+        // Add space for the control bar at the bottom (approximately 50 points)
+        let controlBarHeight: CGFloat = 50
+        let windowHeight = displayHeight + controlBarHeight
+        
         // Create the window content
         let windowContent = NSHostingController(rootView:
             VStack(spacing: 0) {
                 VirtualMachineDisplayView(virtualMachine: virtualMachine)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(width: displayWidth, height: displayHeight)
                 
                 HStack {
                     Text(vm.name)
@@ -153,9 +161,9 @@ struct VMDetailView: View {
             }
         )
         
-        // Create the window
+        // Create the window with the VM's display resolution
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 1920, height: 1200),
+            contentRect: NSRect(x: 0, y: 0, width: displayWidth, height: windowHeight),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
