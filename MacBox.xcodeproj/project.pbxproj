@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E5398AD72ECFE10B0018DD49 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = E5398AD62ECFE10B0018DD49 /* README.md */; };
 		E55D61C52E0F882D008665DD /* Virtualization.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E55D61C42E0F882D008665DD /* Virtualization.framework */; };
 /* End PBXBuildFile section */
 
@@ -28,15 +29,29 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E5398AD62ECFE10B0018DD49 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E55D61C42E0F882D008665DD /* Virtualization.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Virtualization.framework; path = System/Library/Frameworks/Virtualization.framework; sourceTree = SDKROOT; };
 		E59AE2FA2DED9DA3008B0E0F /* MacBox.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacBox.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59AE30A2DED9DA4008B0E0F /* MacBoxTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacBoxTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E59AE3142DED9DA4008B0E0F /* MacBoxUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacBoxUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E5398AD52ECFD96C0018DD49 /* Exceptions for "MacBox" folder in "MacBox" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E59AE2F92DED9DA3008B0E0F /* MacBox */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		E59AE2FC2DED9DA3008B0E0F /* MacBox */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E5398AD52ECFD96C0018DD49 /* Exceptions for "MacBox" folder in "MacBox" target */,
+			);
 			path = MacBox;
 			sourceTree = "<group>";
 		};
@@ -86,6 +101,7 @@
 				E59AE3172DED9DA4008B0E0F /* MacBoxUITests */,
 				E5A711F82DEFE434002C5397 /* Frameworks */,
 				E59AE2FB2DED9DA3008B0E0F /* Products */,
+				E5398AD62ECFE10B0018DD49 /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -227,6 +243,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5398AD72ECFE10B0018DD49 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -433,10 +450,14 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MacBox/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MacBox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app needs to download the restore image from Apple's servers.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app needs to download the restore image from Apple's servers. Installed VMs need to use the local network to access network services if required.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Installed virtual machines require access to location services if the functionality is required and passed through.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -483,10 +504,14 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MacBox/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MacBox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app needs to download the restore image from Apple's servers.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app needs to download the restore image from Apple's servers. Installed VMs need to use the local network to access network services if required.";
+				INFOPLIST_KEY_NSLocationUsageDescription = "Installed virtual machines require access to location services if the functionality is required and passed through.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
