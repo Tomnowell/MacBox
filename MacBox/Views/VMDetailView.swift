@@ -18,118 +18,177 @@ struct VMDetailView: View {
     @State private var isLaunching = false
     @State private var showVMWindow = false
     @State private var vmWindow: NSWindow?
+    @State private var vmState: VZVirtualMachine.State = .stopped
 
     var isRunning: Bool {
         runtimeManager.runningVMs[vm.id] != nil
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            
-            if let message = launchStatus {
-                Text(message)
-                    .foregroundColor(message.contains("Failed") ? .red : .green)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
-            Text(vm.name)
-                .font(.largeTitle)
-            Text("OS: \(vm.osType)")
-            Text("CPU: \(vm.cpuCount) cores")
-            Text("Memory: \(vm.memorySizeMB) MB")
-            Text("Disk: \(vm.diskSizeGB) GB")
-            if let bootDisk = vm.bootDiskImagePath {
-                Text("Boot Disk: \(bootDisk)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
-            if let network = vm.networkType {
-                Text("Network: \(network)")
-            }
-            if !vm.storageDevices.isEmpty {
-                Text("Storage Devices: \(vm.storageDevices.joined(separator: ", "))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            // Show VM window when running
-            if let virtualMachine = VMRuntimeManager.shared.virtualMachine(for: vm.id) {
-                Divider()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 8) {
                 
-                VStack(spacing: 10) {
-                    HStack {
-                        Text("Virtual Machine Display")
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        Button("Open in Window") {
-                            openVMInWindow(virtualMachine: virtualMachine)
+                if let message = launchStatus {
+                    Text(message)
+                        .foregroundColor(message.contains("Failed") ? .red : .green)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                
+                Text(vm.name)
+                    .font(.largeTitle)
+                
+                HStack(alignment: .top, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("CPU: \(vm.cpuCount) cores")
+                    }
+                    
+                        .frame(height: 60)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Memory: \(vm.memorySizeMB) MB")
+                    }
+                    
+                        .frame(height: 60)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Disk: \(vm.diskSizeGB) GB")
+                    }
+                    
+                        .frame(height: 60)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Display: \(vm.displayWidth) × \(vm.displayHeight)")
                         }
-                        .keyboardShortcut("f", modifiers: [.command, .control])
-                        
-                        if let vm = runtimeManager.virtualMachine(for: vm.id) {
-                            Text("State: \(stateDescription(vm.state))")
+                    
+                        .frame(height: 60)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let network = vm.networkType {
+                            Text("Network: \(network)")
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                
+                // Show VM window when running
+                if let virtualMachine = VMRuntimeManager.shared.virtualMachine(for: vm.id) {
+                    
+                    VStack(spacing: 4) {
+                        HStack {
+                            Text("Virtual Machine Display")
+                                .font(.headline)
+                            
+                            Spacer()
+                            
+                            Button("Open in Window") {
+                                openVMInWindow(virtualMachine: virtualMachine)
+                            }
+                            .keyboardShortcut("f", modifiers: [.command, .control])
+                            
+                            Text("State: \(stateDescription(vmState))")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .padding(.leading, 10)
                         }
-                    }
-                    
-                    VirtualMachineDisplayView(virtualMachine: virtualMachine)
-                        .frame(minWidth: 1280, minHeight: 800)
-                        .border(Color.gray.opacity(0.3))
-                }
-            }
                         
-
-            HStack(spacing: 20) {
-                Button(isLaunching ? "Launching..." : "Start VM") {
-                    isLaunching = true
-                    launchStatus = nil
-                    onLaunch()
-                    Task {
-                        // Wait a moment for launch to complete
-                        try? await Task.sleep(nanoseconds: 1_000_000_000)
-                        isLaunching = false
-                        if runtimeManager.isRunning(id: vm.id) {
-                            launchStatus = "VM started successfully!"
-                            showVMWindow = true
+                        VirtualMachineDisplayView(virtualMachine: virtualMachine)
+                            .frame(minWidth: 1200, minHeight: 600)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .aspectRatio(contentMode: .fit)
+                            .border(Color.gray.opacity(0.3))
+                    }
+                }
+ else {
+                    // Placeholder space for VM display to prevent layout shift
+                    
+                    VStack(spacing: 4) {
+                        HStack {
+                            Text("Virtual Machine Display")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            
+                            Spacer()
+                        }
+                        
+                        ZStack {
+                            Rectangle()
+                                .fill(Color(NSColor.windowBackgroundColor))
+                                .frame(minWidth: 1200, minHeight: 600)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .aspectRatio(contentMode: .fit)
+                                .border(Color.gray.opacity(0.3))
+                            
+                            VStack(spacing: 12) {
+                                Image(systemName: "display")
+                                    .font(.system(size: 64))
+                                    .foregroundColor(.secondary.opacity(0.5))
+                                Text("Start the VM to see the display")
+                                    .font(.headline)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                     }
                 }
-                .disabled(isLaunching || isRunning)
+                            
 
-                
-                Button(isStopping ? "Stopping..." : "Stop VM") {
-                    isStopping = true
-                    showVMWindow = false
-                    VMRuntimeManager.shared.stopVM(id: vm.id) { result in
-                        isStopping = false
-                        switch result {
-                        case .success:
-                            launchStatus = "VM '\(vm.name)' stopped successfully."
-                        case .failure(let error):
-                            launchStatus = "Failed to stop VM: \(error.localizedDescription)"
+                HStack(spacing: 20) {
+                    Button(isLaunching ? "Launching..." : "Start VM") {
+                        isLaunching = true
+                        launchStatus = nil
+                        onLaunch()
+                        Task {
+                            isLaunching = false
+                            if runtimeManager.isRunning(id: vm.id) {
+                                launchStatus = "VM started successfully!"
+                                showVMWindow = true
+                            }
                         }
                     }
+                    .disabled(isLaunching || isRunning)
+
+                    
+                    Button(isStopping ? "Stopping..." : "Stop VM") {
+                        isStopping = true
+                        showVMWindow = false
+                        VMRuntimeManager.shared.stopVM(id: vm.id) { result in
+                            isStopping = false
+                            switch result {
+                            case .success:
+                                launchStatus = "VM '\(vm.name)' stopped successfully."
+                            case .failure(let error):
+                                launchStatus = "Failed to stop VM: \(error.localizedDescription)"
+                            }
+                        }
+                    }
+                    .disabled(isStopping || !runtimeManager.isRunning(id: vm.id))
+                    
+                    Spacer()
                 }
-                .disabled(isStopping || !runtimeManager.isRunning(id: vm.id))
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 8)
             }
-            .padding(.top, 20)
+            .padding(.horizontal).padding(.vertical, 8)
         }
-        .padding()
+        .onReceive(Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()) { _ in
+            // Update VM state periodically
+            if let virtualMachine = runtimeManager.virtualMachine(for: vm.id) {
+                vmState = virtualMachine.state
+            } else {
+                vmState = .stopped
+            }
+        }
     }
     
     private func openVMInWindow(virtualMachine: VZVirtualMachine) {
         // Close existing window if any
         vmWindow?.close()
         
-        // VM display resolution (matches VZConfigurationBuilder settings: 1920x1200)
-        let displayWidth: CGFloat = 1920
-        let displayHeight: CGFloat = 1200
+        // VM display resolution (from VMConfig)
+        let displayWidth: CGFloat = CGFloat(vm.displayWidth)
+        let displayHeight: CGFloat = CGFloat(vm.displayHeight)
         
         // Add space for the control bar at the bottom (approximately 50 points)
         let controlBarHeight: CGFloat = 50
@@ -171,7 +230,7 @@ struct VMDetailView: View {
         
         window.title = "\(vm.name) - Virtual Machine"
         window.contentViewController = windowContent
-        window.center()
+        window.setFrameTopLeftPoint(NSPoint(x: 0, y: NSScreen.main?.frame.height ?? 1080))
         window.makeKeyAndOrderFront(nil)
         
         // Enable fullscreen

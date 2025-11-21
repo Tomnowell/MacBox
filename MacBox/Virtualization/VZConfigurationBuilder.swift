@@ -37,7 +37,7 @@ struct VZConfigurationBuilder {
         configuration.bootLoader = VZMacOSBootLoader()
         
         // Set up graphics device
-        configuration.graphicsDevices = [createGraphicsDevice()]
+        configuration.graphicsDevices = [createGraphicsDevice(config: config)]
         
         // Set up storage
         configuration.storageDevices = try createStorageDevices(config: config)
@@ -122,16 +122,16 @@ struct VZConfigurationBuilder {
     
     // MARK: - Graphics Device
     
-    private static func createGraphicsDevice() -> VZMacGraphicsDeviceConfiguration {
+    private static func createGraphicsDevice(config: VMConfig) -> VZMacGraphicsDeviceConfiguration {
         let graphicsDevice = VZMacGraphicsDeviceConfiguration()
         graphicsDevice.displays = [
             VZMacGraphicsDisplayConfiguration(
-                widthInPixels: 1920,
-                heightInPixels: 1200,
+                widthInPixels: config.displayWidth,
+                heightInPixels: config.displayHeight,
                 pixelsPerInch: 80
             )
         ]
-        print("✓ Graphics device configured (1920x1200)")
+        print("✓ Graphics device configured (\(config.displayWidth)x\(config.displayHeight))")
         return graphicsDevice
     }
     

@@ -93,27 +93,55 @@ class VMManager: ObservableObject {
     
     private func cleanupVMFiles(for vm: VMConfig) {
         let fileManager = FileManager.default
+        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         
-        // Remove boot disk image
-        if let bootDiskPath = vm.bootDiskImagePath {
-            try? fileManager.removeItem(atPath: bootDiskPath)
-            print("Removed boot disk: \(bootDiskPath)")
+        // Remove the entire VM directory which contains:
+        // - Disk.img
+        // - MachineIdentifier
+        // - AuxiliaryStorage
+        // - Any other VM-specific files
+        let vmDir = appSupport.appendingPathComponent("MacBox/VMs/\(vm.id.uuidString)", isDirectory: true)
+        
+        if fileManager.fileExists(atPath: vmDir.path) {
+            do {
+                try fileManager.removeItem(at: vmDir)
+                print("✓ Removed VM directory: \(vmDir.path)")
+            } catch {
+                print("✗ Failed to remove VM directory: \(error.localizedDescription)")
+            }
+        }
+        
+        // Also remove boot disk if it's stored outside the VM directory
+        if let bootDiskPath = vm.bootDiskImagePath, !bootDiskPath.contains(vm.id.uuidString) {
+            if fileManager.fileExists(atPath: bootDiskPath) {
+                do {
+                    try fileManager.removeItem(atPath: bootDiskPath)
+                    print("✓ Removed boot disk: \(bootDiskPath)")
+                } catch {
+                    print("✗ Failed to remove boot disk: \(error.localizedDescription)")
+                }
+            }
         }
         
         // Remove additional storage devices
         for storagePath in vm.storageDevices {
-            try? fileManager.removeItem(atPath: storagePath)
-            print("Removed storage device: \(storagePath)")
+            if fileManager.fileExists(atPath: storagePath) {
+                do {
+                    try fileManager.removeItem(atPath: storagePath)
+                    print("✓ Removed storage device: \(storagePath)")
+                } catch {
+                    print("✗ Failed to remove storage device: \(error.localizedDescription)")
+                }
+            }
         }
         
-        // Remove auxiliary storage and other VM artifacts
-        let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let vmArtifactsDir = appSupport.appendingPathComponent("MacBoxAuxiliaryStorage", isDirectory: true)
-        let vmSpecificArtifacts = vmArtifactsDir.appendingPathComponent(vm.id.uuidString, isDirectory: true)
-        
-        if fileManager.fileExists(atPath: vmSpecificArtifacts.path) {
-            try? fileManager.removeItem(at: vmSpecificArtifacts)
-            print("Removed VM artifacts: \(vmSpecificArtifacts.path)")
+        // Remove installation marker if it exists
+        if let bootDiskPath = vm.bootDiskImagePath {
+            let markerURL = URL(fileURLWithPath: bootDiskPath).appendingPathExtension("installed")
+            if fileManager.fileExists(atPath: markerURL.path) {
+                try? fileManager.removeItem(at: markerURL)
+                print("✓ Removed installation marker")
+            }
         }
     }
     

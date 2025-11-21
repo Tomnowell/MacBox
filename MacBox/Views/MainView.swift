@@ -35,11 +35,6 @@ struct MainView: View {
                         showingCreateSheet = true
                     }
                 }
-                ToolbarItemGroup(placement: .primaryAction) {
-                    Button("Clear All") {
-                        vmManager.clearAllVMs()
-                    }
-                }
             }
         } detail: {
             if let vmConfig = selectedVM {
@@ -52,8 +47,10 @@ struct MainView: View {
                         }
                     }
                 }
+                .frame(minWidth: 600, maxWidth: .infinity, minHeight: 400, maxHeight: .infinity)
             } else {
                 Text("Select a VM")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .sheet(isPresented: $showingCreateSheet) {

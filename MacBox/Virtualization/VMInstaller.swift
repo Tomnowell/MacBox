@@ -8,20 +8,56 @@
 @preconcurrency import Virtualization // Relax concurrency checking; Apple Virtualization types aren't fully Sendable yet
 import Foundation
 
+struct RestoreImageInfo: Identifiable, Hashable {
+    let id = UUID()
+    let url: URL
+    let buildVersion: String
+    let isLatest: Bool
+    
+    var displayName: String {
+        let filename = url.lastPathComponent
+        // Extract version from filename if possible (e.g., "UniversalMac_14.0_23A344_Restore.ipsw")
+        if let versionMatch = filename.range(of: #"_(\d+\.\d+(?:\.\d+)?)_"#, options: .regularExpression) {
+            let version = String(filename[versionMatch]).trimmingCharacters(in: CharacterSet(charactersIn: "_"))
+            return "macOS \(version) (Build \(buildVersion))\(isLatest ? " - Latest" : "")"
+        }
+        return "macOS Build \(buildVersion)\(isLatest ? " - Latest" : "")"
+    }
+}
+
 struct VMInstaller {
     
     private var vm: VZVirtualMachine!
     private var localRestoreImageURL: URL? = nil
     
-    
-    
-    static func downloadLatest() async throws -> (VZMacOSRestoreImage, URL) {
-        // Use latestSupported to discover a URL, then ALWAYS operate on a locally cached IPSW
-        guard let latest = try? await VZMacOSRestoreImage.latestSupported else {
-            fatalError("No restore image is supported for this host.")
+    /// Fetch all available macOS restore images
+    static func fetchAvailableRestoreImages() async throws -> [RestoreImageInfo] {
+        // Fetch the latest supported restore image
+        let latestImage: VZMacOSRestoreImage = try await withCheckedThrowingContinuation { continuation in
+            VZMacOSRestoreImage.fetchLatestSupported { result in
+                switch result {
+                case .success(let image):
+                    continuation.resume(returning: image)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
         }
-
-        let remoteURL = latest.url
+        
+        let restoreInfo = RestoreImageInfo(
+            url: latestImage.url,
+            buildVersion: latestImage.buildVersion,
+            isLatest: true)
+        return [restoreInfo]
+    }
+    
+    /// Download and cache a specific restore image
+    static func downloadRestoreImage(from restoreInfo: RestoreImageInfo) async throws -> (VZMacOSRestoreImage, URL) {
+        return try await downloadRestoreImage(from: restoreInfo.url)
+    }
+    
+    /// Download and cache a restore image from a specific URL
+    static func downloadRestoreImage(from remoteURL: URL) async throws -> (VZMacOSRestoreImage, URL) {
         let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
         let cacheDir = appSupportDir.appendingPathComponent("MacBoxRestoreImages", isDirectory: true)
         try FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
@@ -65,6 +101,14 @@ struct VMInstaller {
             print("[VMInstaller] Loaded local restore image; mostFeaturefulSupportedConfiguration = nil (unexpected)")
         }
         return (localRestoreImage, localRestoreImageURL)
+    }
+    
+    /// Download the latest supported restore image (convenience method)
+    static func downloadLatest() async throws -> (VZMacOSRestoreImage, URL) {
+        guard let latest = try? await VZMacOSRestoreImage.latestSupported else {
+            fatalError("No restore image is supported for this host.")
+        }
+        return try await downloadRestoreImage(from: latest.url)
     }
     
     // Helper function to download a file with retry logic and exponential backoff.

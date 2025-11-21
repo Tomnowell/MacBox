@@ -16,12 +16,12 @@ struct MacBoxApp: App {
         WindowGroup {
             MainView()
                 .environmentObject(vmManager)
+                .frame(minWidth: 1450, minHeight: 800)
         }
         .windowStyle(DefaultWindowStyle())
+        .defaultSize(width: 1600, height: 900)
+        .commands {
+            CommandGroup(replacing: .windowSize) {}
+        }
     }
 }
-
-
-
-
-

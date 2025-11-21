@@ -43,7 +43,17 @@ final class VMRuntimeManager: ObservableObject {
     }
 
     func launchVM(from config: VMConfig) async throws {
-        let (restoreImage, restoreImageURL) = try await VMInstaller.downloadLatest()
+        // Use the restore image URL from config if specified, otherwise download the latest
+        let (restoreImage, restoreImageURL): (VZMacOSRestoreImage, URL)
+        if let configRestoreURLString = config.restoreImageURL,
+           let configRestoreURL = URL(string: configRestoreURLString) {
+            print("[VMRuntimeManager] Using specified restore image: \(configRestoreURL.lastPathComponent)")
+            (restoreImage, restoreImageURL) = try await VMInstaller.downloadRestoreImage(from: configRestoreURL)
+        } else {
+            print("[VMRuntimeManager] No restore image specified, using latest")
+            (restoreImage, restoreImageURL) = try await VMInstaller.downloadLatest()
+        }
+        
         if let most = restoreImage.mostFeaturefulSupportedConfiguration {
             print("Restore image hardware model supports minCPU=\(most.minimumSupportedCPUCount) minMem=\(most.minimumSupportedMemorySize)B")
         } else {
@@ -111,7 +121,7 @@ final class VMRuntimeManager: ObservableObject {
         print("Graphics Devices: \(String(describing: vm.graphicsDevices))")
     }
 
-    func stopVM(id: UUID, completion: @escaping (Result<Void, Error>) -> Void) {
+    func stopVM(id: UUID, completion: @escaping @Sendable(Result<Void, Error>) -> Void) {
         guard let vm = runningVMs[id] else {
             completion(.failure(NSError(domain: "VMRuntimeManager", code: 404, userInfo: [NSLocalizedDescriptionKey: "VM not found."])))
             return
@@ -201,6 +211,46 @@ final class VMRuntimeManager: ObservableObject {
                 case .success:
                     print("macOS installation succeeded for VM \(vmID)")
                     self.writeInstallationMarker(for: bootDiskURL)
+                    
+                    // Wait for the VM to stop after installation, then restart it
+                    print("[VM \(vmID)] Waiting for VM to stop after installation...")
+                    Task {
+                        // Wait for VM to reach stopped state
+                        guard let installedVM = self.runningVMs[vmID] else {
+                            print("[VM \(vmID)] VM not found in runningVMs for restart")
+                            return
+                        }
+                        
+                        // Poll the VM state until it's stopped (with timeout)
+                        var attempts = 0
+                        let maxAttempts = 30 // 30 seconds timeout
+                        while installedVM.state != .stopped && attempts < maxAttempts {
+                            try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                            attempts += 1
+                            if attempts % 5 == 0 {
+                                print("[VM \(vmID)] Still waiting for VM to stop... (state: \(installedVM.state.rawValue))")
+                            }
+                        }
+                        
+                        if installedVM.state == .stopped {
+                            print("[VM \(vmID)] VM stopped. Automatically restarting...")
+                            await MainActor.run {
+                                installedVM.start { startResult in
+                                    Task { @MainActor in
+                                        switch startResult {
+                                        case .success:
+                                            print("[VM \(vmID)] ✓ VM restarted successfully after installation")
+                                        case .failure(let startError):
+                                            print("[VM \(vmID)] ✗ Failed to restart VM after installation: \(startError.localizedDescription)")
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            print("[VM \(vmID)] Timeout waiting for VM to stop (current state: \(installedVM.state.rawValue))")
+                        }
+                    }
+                    
                 case .failure(let error):
                     print("macOS installation failed (attempt \(attempt)) for VM \(vmID): \(self.detailedErrorString(error))")
                     self.dumpFirstSectors(of: bootDiskURL, vmID: vmID)

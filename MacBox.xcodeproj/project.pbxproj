@@ -305,6 +305,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					arm64,
+				);
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -371,6 +375,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					arm64,
+				);
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -428,10 +436,15 @@
 		E59AE31F2DED9DA4008B0E0F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					arm64,
+				);
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon Light";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				AUTOMATION_APPLE_EVENTS = NO;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_ENTITLEMENTS = MacBox/MacBox.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -449,12 +462,13 @@
 				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MacBox/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MacBox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "MacBox may pass through Bluetooth access to virtual machines if configured.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MacBox may pass through camera access to virtual machines if configured";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app needs to download the restore image from Apple's servers. Installed VMs need to use the local network to access network services if required.";
 				INFOPLIST_KEY_NSLocationUsageDescription = "Installed virtual machines require access to location services if the functionality is required and passed through.";
@@ -482,10 +496,14 @@
 		E59AE3202DED9DA4008B0E0F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				"ALTERNATE_OWNER[sdk=*]" = "$(INSTALL_OWNER)";
+				ARCHS = "$(ARCHS_STANDARD)";
+				"ARCHS[sdk=macosx*]" = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon Light";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				AUTOMATION_APPLE_EVENTS = NO;
+				CLANG_USE_OPTIMIZATION_PROFILE = YES;
 				CODE_SIGN_ENTITLEMENTS = MacBox/MacBox.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
@@ -503,12 +521,13 @@
 				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
 				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
+				EXCLUDED_ARCHS = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MacBox/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MacBox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "MacBox may pass through Bluetooth access to virtual machines if configured.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "MacBox may pass through camera access to virtual machines if configured";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "The app needs to download the restore image from Apple's servers. Installed VMs need to use the local network to access network services if required.";
 				INFOPLIST_KEY_NSLocationUsageDescription = "Installed virtual machines require access to location services if the functionality is required and passed through.";

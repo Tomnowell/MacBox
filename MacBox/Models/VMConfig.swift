@@ -19,8 +19,11 @@ struct VMConfig: Identifiable, Codable, Equatable, Hashable, Sendable {
     var bootDiskImagePath: String? // Absolute paths to attached disk images
     var installMediaPath: URL? // Optional boot/install ISO image
     var networkType: String? // e.g., "NAT", "Bridged", "HostOnly"
+    var restoreImageURL: String? // URL of the selected macOS restore image
     
     var storageDevices: [String]
+    var displayWidth: Int
+    var displayHeight: Int
 
     init(
         id: UUID = UUID(),
@@ -32,7 +35,10 @@ struct VMConfig: Identifiable, Codable, Equatable, Hashable, Sendable {
         efiVariableStorePath: String? = nil,
         bootDiskImagePath: String? = nil,
         networkType: String? = nil,
-        storageDevices: [String] = []
+        restoreImageURL: String? = nil,
+        storageDevices: [String] = [],
+        displayWidth: Int = 1920,
+        displayHeight: Int = 1200
     ) {
         self.id = id
         self.name = name
@@ -43,12 +49,15 @@ struct VMConfig: Identifiable, Codable, Equatable, Hashable, Sendable {
         self.efiVariableStorePath = efiVariableStorePath
         self.bootDiskImagePath = bootDiskImagePath
         self.networkType = networkType
+        self.restoreImageURL = restoreImageURL
         self.storageDevices = storageDevices
+        self.displayWidth = displayWidth
+        self.displayHeight = displayHeight
     }
 
     // MARK: - Codable conformance
     enum CodingKeys: String, CodingKey {
-        case id, name, cpuCount, memorySizeMB, diskSizeGB, osType, bootDiskImagePath, installMediaPath, networkType, storageDevices
+        case id, name, cpuCount, memorySizeMB, diskSizeGB, osType, bootDiskImagePath, installMediaPath, networkType, restoreImageURL, storageDevices, displayWidth, displayHeight
     }
     
     // MARK: - Hashable
