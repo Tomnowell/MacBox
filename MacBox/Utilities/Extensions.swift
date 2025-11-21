@@ -1,3 +1,10 @@
+//
+//  Utilities/Extensions.swift
+//  MacBox
+//
+//  Created by Tom on 2025/06/8.
+//
+
 import Foundation
 import SwiftUI
 

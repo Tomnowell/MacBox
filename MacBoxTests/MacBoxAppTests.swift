@@ -1,3 +1,9 @@
+//
+//  MacBoxAppTests.swift
+//  MacBoxAppTests
+//
+//  Created by Tom on 2025/06/02.
+//
 import Testing
 import SwiftUI
 

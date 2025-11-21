@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Virtualization
 
 struct VMDetailView: View {
     let vm: VMConfig
@@ -16,6 +17,7 @@ struct VMDetailView: View {
     @State private var isStopping = false
     @State private var isLaunching = false
     @State private var showVMWindow = false
+    @State private var vmWindow: NSWindow?
 
     var isRunning: Bool {
         runtimeManager.runningVMs[vm.id] != nil
@@ -57,8 +59,24 @@ struct VMDetailView: View {
                 Divider()
                 
                 VStack(spacing: 10) {
-                    Text("Virtual Machine Display")
-                        .font(.headline)
+                    HStack {
+                        Text("Virtual Machine Display")
+                            .font(.headline)
+                        
+                        Spacer()
+                        
+                        Button("Open in Window") {
+                            openVMInWindow(virtualMachine: virtualMachine)
+                        }
+                        .keyboardShortcut("f", modifiers: [.command, .control])
+                        
+                        if let vm = runtimeManager.virtualMachine(for: vm.id) {
+                            Text("State: \(stateDescription(vm.state))")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .padding(.leading, 10)
+                        }
+                    }
                     
                     VirtualMachineDisplayView(virtualMachine: virtualMachine)
                         .frame(minWidth: 1280, minHeight: 800)
@@ -103,5 +121,74 @@ struct VMDetailView: View {
             .padding(.top, 20)
         }
         .padding()
+    }
+    
+    private func openVMInWindow(virtualMachine: VZVirtualMachine) {
+        // Close existing window if any
+        vmWindow?.close()
+        
+        // Create the window content
+        let windowContent = NSHostingController(rootView:
+            VStack(spacing: 0) {
+                VirtualMachineDisplayView(virtualMachine: virtualMachine)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                
+                HStack {
+                    Text(vm.name)
+                        .font(.headline)
+                    
+                    Spacer()
+                    
+                    Text("State: \(stateDescription(virtualMachine.state))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Button("Close Window") {
+                        vmWindow?.close()
+                    }
+                    .padding(.leading, 10)
+                }
+                .padding()
+                .background(Color(NSColor.controlBackgroundColor))
+            }
+        )
+        
+        // Create the window
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 1920, height: 1200),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        
+        window.title = "\(vm.name) - Virtual Machine"
+        window.contentViewController = windowContent
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        
+        // Enable fullscreen
+        window.collectionBehavior = [.fullScreenPrimary]
+        
+        // Store reference to window
+        vmWindow = window
+        
+        // Make the window stay open and handle close
+        window.isReleasedWhenClosed = false
+    }
+    
+    private func stateDescription(_ state: VZVirtualMachine.State) -> String {
+        switch state {
+        case .stopped: return "Stopped"
+        case .running: return "Running"
+        case .paused: return "Paused"
+        case .error: return "Error"
+        case .starting: return "Starting"
+        case .pausing: return "Pausing"
+        case .resuming: return "Resuming"
+        case .stopping: return "Stopping"
+        case .saving: return "Saving State"
+        case .restoring: return "Restoring State"
+        @unknown default: return "Unknown"
+        }
     }
 }

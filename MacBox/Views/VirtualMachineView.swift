@@ -14,6 +14,7 @@ struct VirtualMachineView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var errorMessage: String?
     @State private var showError = false
+    @State private var isFullscreen = false
     
     var body: some View {
         VStack(spacing: 0) {
@@ -41,6 +42,12 @@ struct VirtualMachineView: View {
                     stopVM()
                 }
                 .disabled(!runtimeManager.isRunning(id: vmConfig.id))
+                
+                Button(isFullscreen ? "Exit Fullscreen" : "Fullscreen") {
+                    toggleFullscreen()
+                }
+                .disabled(!runtimeManager.isRunning(id: vmConfig.id))
+                .keyboardShortcut("f", modifiers: [.command, .control])
                 
                 Spacer()
                 
@@ -73,6 +80,12 @@ struct VirtualMachineView: View {
                 showError = true
             }
         }
+    }
+    
+    private func toggleFullscreen() {
+        guard let window = NSApp.keyWindow else { return }
+        window.toggleFullScreen(nil)
+        isFullscreen.toggle()
     }
     
     private func stateDescription(_ state: VZVirtualMachine.State) -> String {
